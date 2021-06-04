@@ -1,0 +1,407 @@
+#%RAML 1.0
+
+title: Jungle Devs - Django Challenge-001
+version: v1
+baseUri: http://localhost
+mediaType:  application/json
+securitySchemes:
+    JWT:
+      description: JWT token.
+      type: x-jwt
+      describedBy:
+        headers:
+          Authorization:
+            description: Used to send a valid JWT access token.
+            type: string
+
+traits:
+  secured:
+    usage: Apply this to any method that needs to be secured
+    description: Some requests require authentication.
+    headers:
+      access_token:
+        description: Access Token
+        example: 5757gh76
+        required: true
+
+types:
+  User:
+    description: API user.
+    properties:
+      username:
+      password:
+    example:
+      username: bob@email.com
+      password: "123456"
+
+  AccessToken:
+    description: |
+        JWT token returned from the server if authentication was OK,
+        it must be used to access administrator content.
+    properties:
+      access_token:
+        type: string
+        pattern: ^\w+\.\w+\.\w+
+    example:
+      access_token: abcdef.ghijkl.mnopq
+
+  Message:
+    description: Informative messages.
+    properties:
+      message: string
+
+/api/login:
+  description: Users authentication.
+  post:
+    body:
+      type: User
+    responses:
+      200:
+        body:
+          type: AccessToken
+
+      400:
+        body:
+          type: Message
+          example:
+            message: invalid username or password
+
+/api/sign-up:
+  description: Create new users.
+  post:
+    body:
+      type: User
+    responses:
+      201:
+        description: New user created successfully.
+      400:
+        body:
+          type: Message
+          example:
+            message: User already exists
+
+/api/admin/authors:
+  # securedBy: JWT
+  is: [secured]
+  post:
+    body:
+      type: object
+      properties:
+        name:
+        picture:
+      example:
+        name: John Doe
+        picture: http://johndoepic.com
+    responses:
+      201:
+        description: Author created successfully.
+        body:
+          type: object
+          properties:
+            id:
+            name:
+            picture:
+          example:
+            id: 2d460e48-a4fa-370b-a2d0-79f2f601988c
+            name: John Doe
+            picture: http://johndoepic.com
+      401:
+        body:
+          type: Message
+          example:
+            message: Authorization header is missing
+  get:
+    description: Retrieve a list of all authors.
+    responses:
+      200:
+        body:
+          type: array
+          example:
+            - # item 1
+              id: 2d460e48-a4fa-370b-a2d0-79f2f601988c
+              name: John Doe
+              picture: http://johndoepic.com
+            - # item 2
+              id: 32160e48-a4fa-370b-a2d0-79f2f601988c
+              name: Jane Doe
+              picture: http://janedoepic.com
+      401:
+        body:
+          type: Message
+          example:
+            message: Authorization header is missing
+
+  /{author_id}:
+    securedBy: JWT
+    uriParameters:
+      author_id: string
+    get:
+      description: Retrieve infomation of an author with the respective id.
+      responses:
+        200:
+          body:
+            type: object
+            properties:
+              id:
+              name:
+              picture:
+            example:
+              id: 2d460e48-a4fa-370b-a2d0-79f2f601988c
+              name: John Doe
+              picture: http://johndoepic.com
+        404:
+          body:
+            type: Message
+            example:
+              message: Author not found with the informed id
+        401:
+          body:
+            type: Message
+            example:
+              message: Authorization header is missing
+
+    put:
+      description: Update the author information with the respective id.
+      body:
+        type: object
+        properties:
+          name?:
+          picture?:
+        example:
+          name: John Doe Updated
+          picture: https://newjohndoepic.com
+      responses:
+        200:
+          body:
+            type: object
+            example:
+              id: 2d460e48-a4fa-370b-a2d0-79f2f601988c
+              name: John Doe Updated
+              picture: https://newjohndoepic.com
+        404:
+          body:
+            type: Message
+            example:
+              message: Author not found with the informed id
+        401:
+          body:
+            type: Message
+            example:
+              message: Authorization header is missing
+
+    delete:
+      description: Delete the author with the respective id.
+      responses:
+        200:
+          description: Author deleted successfully.
+        404:
+          body:
+            type: Message
+            example:
+              message: Author not found with the informed id
+        401:
+          body:
+            type: Message
+            example:
+              message: Authorization header is missing
+
+/api/admin/articles:
+  securedBy: JWT
+  post:
+    description: Create a new article.
+    body:
+      type: object
+      properties:
+        author_id:
+        category:
+        title:
+        summary:
+        first_paragraph:
+        body:
+      example:
+        author_id: 2d460e48-a4fa-370b-a2d0-79f2f601988c
+        category: science fiction
+        title: "2001: A Space Odyssey"
+        summary: "2001: A Space Odyssey is..."
+        first_paragraph: In the prehistoric African veldt, a tribe of hominids is driven away from...
+        body: Millions of years later, Dr. Heywood Floyd...
+    responses:
+      201:
+        description: Article created successfully.
+        body:
+          type: object
+          example:
+            author_id: 2d460e48-a4fa-370b-a2d0-79f2f601988c
+            category: science fiction
+            title: "2001: A Space Odyssey"
+            summary: "2001: A Space Odyssey is..."
+            first_paragraph: In the prehistoric African veldt, a tribe of hominids is driven away from...
+            body: Millions of years later, Dr. Heywood Floyd...
+      400:
+        description: Author ID not found.
+        body:
+          type: Message
+          example:
+            message: The informed author id could be found
+      401:
+        body:
+          type: Message
+          example:
+            message: Authorization header is missing
+  get:
+    description: Retrieve a list with all articles.
+    responses:
+      200:
+        description: List of all articles
+        body:
+          type: array
+          example:
+            - # item 1
+              author_id: 2d460e48-a4fa-370b-a2d0-79f2f601988c
+              category: science fiction
+              title: "2001: A Space Odyssey"
+              summary: "2001: A Space Odyssey is..."
+              first_paragraph: In the prehistoric African veldt, a tribe of hominids is driven away from...
+              body: Millions of years later, Dr. Heywood Floyd...
+            - # item 2
+              author_id: 12345e48-a4fa-370b-a2d0-79f2f601988c
+              category: drama
+              title: "Pride and Prejudice"
+              summary: Pride and Prejudice is an 1813 romantic novel of manners written by Jane Austen...
+              first_paragraph: The novel is set in rural England in the early 19th century...
+              body: At the ball, we are first introduced to the whole Netherfield party, which...
+      401:
+        body:
+          type: Message
+          example:
+            message: Authorization header is missing
+
+  /{article_id}:
+    securedBy: JWT
+    uriParameters:
+      article_id: string
+    get:
+      description: Retrieve infomation of an article with the respective id.
+      responses:
+        200:
+          body:
+            type: object
+            example:
+              author_id: 2d460e48-a4fa-370b-a2d0-79f2f601988c
+              category: science fiction
+              title: "2001: A Space Odyssey"
+              summary: "2001: A Space Odyssey is..."
+              first_paragraph: In the prehistoric African veldt, a tribe of hominids is driven away from...
+              body: Millions of years later, Dr. Heywood Floyd...
+        404:
+          description: Article id not found.
+          body:
+            type: Message
+            example:
+              message: Article not found with the informed id
+        401:
+          body:
+            type: Message
+            example:
+              message: Authorization header is missing
+    put:
+      description: Update the article information with the respective id.
+      body:
+        type: object
+        properties:
+          author_id?:
+          category?:
+          title?:
+          summary?:
+          first_paragraph?:
+          body?:
+        example:
+          title: "2001: A Space Odyssey Updated"
+          summary: "2001: A Space Odyssey is... more info"
+      responses:
+        200:
+          description: Article successfully updated.
+          body:
+            type: object
+            example:
+              author_id: 2d460e48-a4fa-370b-a2d0-79f2f601988c
+              category: science fiction
+              title: "2001: A Space Odyssey Updated"
+              summary: "2001: A Space Odyssey is... more info"
+              first_paragraph: In the prehistoric African veldt, a tribe of hominids is driven away from...
+              body: Millions of years later, Dr. Heywood Floyd...
+        404:
+          description: Article id not found.
+          body:
+            type: Message
+            example:
+              message: Article not found with the informed id
+        401:
+          body:
+            type: Message
+            example:
+              message: Authorization header is missing
+    delete:
+      description: Delete the article information with the respective id.
+      responses:
+        200:
+          description: Article successfully deleted.
+        404:
+          description: Article id not found.
+          body:
+            type: Message
+            example:
+              message: Article not found with the informed id
+        401:
+          body:
+            type: Message
+            example:
+              message: Authorization header is missing
+
+/api/articles:
+  get:
+    description: Get a list of articles.
+    queryParameters:
+      category?:
+        description: Category slug
+        type: string
+        example: science-fiction
+
+  /{article_id}:
+    description: Detailed information of an article.
+    uriParameters:
+      article_id:
+    get:
+      description: The detail level will depend on it's a logged or anonymous user.
+      responses:
+        200:
+          body:
+            type: object
+            examples:
+              logged_user:
+                id: 2d460e48-a4fa-370b-a2d0-79f2f601988c
+                author:
+                  id: 2d460e48-a4fa-370b-a2d0-79f2f601988c
+                  name: Author Name
+                  picture: https://picture.url
+                category: science fiction
+                title: "2001: A Space Odyssey Updated"
+                summary: "2001: A Space Odyssey is... more info"
+                first_paragraph: In the prehistoric African veldt, a tribe of hominids is driven away from...
+                body: Millions of years later, Dr. Heywood Floyd...
+              anonymous_user:
+                id: 2d460e48-a4fa-370b-a2d0-79f2f601988c
+                author:
+                  id: 2d460e48-a4fa-370b-a2d0-79f2f601988c
+                  name: Author Name
+                  picture: https://picture.url
+                category: science fiction
+                title: "2001: A Space Odyssey Updated"
+                summary: "2001: A Space Odyssey is... more info"
+                first_paragraph: In the prehistoric African veldt, a tribe of hominids is driven away from...
+        404:
+          description: Article id not found.
+          body:
+            type: Message
+            example:
+              message: Article not found with the informed id

@@ -4,24 +4,15 @@ title: Jungle Devs - Django Challenge-001
 version: v1
 baseUri: http://localhost
 mediaType:  application/json
-securitySchemes:
-    JWT:
-      description: JWT token.
-      type: x-jwt
-      describedBy:
-        headers:
-          Authorization:
-            description: Used to send a valid JWT access token.
-            type: string
 
 traits:
   secured:
     usage: Apply this to any method that needs to be secured
     description: Some requests require authentication.
     headers:
-      access_token:
+      token:
         description: Access Token
-        example: 5757gh76
+        example: ca7eab006374b95c515cb16f9c7fb5004d8467b2
         required: true
 
 types:
@@ -31,19 +22,18 @@ types:
       username:
       password:
     example:
-      username: bob@email.com
+      username: bob
       password: "123456"
 
   AccessToken:
     description: |
-        JWT token returned from the server if authentication was OK,
+        Token returned from the server if authentication is OK,
         it must be used to access administrator content.
     properties:
-      access_token:
+      token:
         type: string
-        pattern: ^\w+\.\w+\.\w+
     example:
-      access_token: abcdef.ghijkl.mnopq
+      token: ca7eab006374b95c515cb16f9c7fb5004d8467b2
 
   Message:
     description: Informative messages.
@@ -64,7 +54,7 @@ types:
         body:
           type: Message
           example:
-            message: invalid username or password
+            message: Unable to log in with provided credentials.
 
 /api/sign-up:
   description: Create new users.
@@ -74,14 +64,17 @@ types:
     responses:
       201:
         description: New user created successfully.
+        body:
+          example:
+            username: bob
+            password: pbkdf2_sha256$216000$FaNpgFroPRPz$xzmqigb8tX51GRRULE6a6S/S0lcfVORsYLTyJCzDAN4=
       400:
         body:
           type: Message
           example:
-            message: User already exists
+            message: A user with that username already exists.
 
 /api/admin/authors:
-  # securedBy: JWT
   is: [secured]
   post:
     body:
@@ -105,11 +98,17 @@ types:
             id: 2d460e48-a4fa-370b-a2d0-79f2f601988c
             name: John Doe
             picture: http://johndoepic.com
+      400:
+        description: A valid URL is mandatory.
+        body:
+          type: Message
+          example:
+            message: Enter a valid URL.
       401:
         body:
           type: Message
           example:
-            message: Authorization header is missing
+            message: Authentication credentials were not provided.
   get:
     description: Retrieve a list of all authors.
     responses:
@@ -129,10 +128,10 @@ types:
         body:
           type: Message
           example:
-            message: Authorization header is missing
+            message: Authentication credentials were not provided.
 
   /{author_id}:
-    securedBy: JWT
+    is: [secured]
     uriParameters:
       author_id: string
     get:
@@ -153,12 +152,12 @@ types:
           body:
             type: Message
             example:
-              message: Author not found with the informed id
+              message: Not found.
         401:
           body:
             type: Message
             example:
-              message: Authorization header is missing
+              message: Authentication credentials were not provided.
 
     put:
       description: Update the author information with the respective id.
@@ -182,28 +181,28 @@ types:
           body:
             type: Message
             example:
-              message: Author not found with the informed id
+              message: Not found.
         401:
           body:
             type: Message
             example:
-              message: Authorization header is missing
+              message: Authentication credentials were not provided.
 
     delete:
       description: Delete the author with the respective id.
       responses:
-        200:
+        204:
           description: Author deleted successfully.
         404:
           body:
             type: Message
             example:
-              message: Author not found with the informed id
+              message: Not found.
         401:
           body:
             type: Message
             example:
-              message: Authorization header is missing
+              message: Authentication credentials were not provided.
 
 /api/admin/articles:
   securedBy: JWT
@@ -247,7 +246,7 @@ types:
         body:
           type: Message
           example:
-            message: Authorization header is missing
+            message: Authentication credentials were not provided.
   get:
     description: Retrieve a list with all articles.
     responses:
@@ -274,7 +273,7 @@ types:
         body:
           type: Message
           example:
-            message: Authorization header is missing
+            message: Authentication credentials were not provided.
 
   /{article_id}:
     securedBy: JWT
@@ -298,12 +297,12 @@ types:
           body:
             type: Message
             example:
-              message: Article not found with the informed id
+              message: Not found.
         401:
           body:
             type: Message
             example:
-              message: Authorization header is missing
+              message: Authentication credentials were not provided.
     put:
       description: Update the article information with the respective id.
       body:
@@ -335,12 +334,12 @@ types:
           body:
             type: Message
             example:
-              message: Article not found with the informed id
+              message: Not found.
         401:
           body:
             type: Message
             example:
-              message: Authorization header is missing
+              message: Authentication credentials were not provided.
     delete:
       description: Delete the article information with the respective id.
       responses:
@@ -351,12 +350,12 @@ types:
           body:
             type: Message
             example:
-              message: Article not found with the informed id
+              message: Not found.
         401:
           body:
             type: Message
             example:
-              message: Authorization header is missing
+              message: Authentication credentials were not provided.
 
 /api/articles:
   get:
@@ -404,4 +403,4 @@ types:
           body:
             type: Message
             example:
-              message: Article not found with the informed id
+              message: Not found.

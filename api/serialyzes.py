@@ -1,5 +1,8 @@
+from api.models import Author
 from django.contrib.auth.models import User
 from rest_framework import serializers
+
+from .models import Author
 
 
 class UserSerialyzer(serializers.ModelSerializer):
@@ -13,3 +16,10 @@ class UserSerialyzer(serializers.ModelSerializer):
         user.set_password(validated_data["password"])
         user.save()
         return user
+
+
+class AuthorSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Author
+        fields = ("id", "name", "picture")

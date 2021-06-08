@@ -2,7 +2,7 @@ from api.models import Author
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from .models import Author
+from .models import Article, Author
 
 
 class UserSerialyzer(serializers.ModelSerializer):
@@ -23,3 +23,10 @@ class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Author
         fields = ("id", "name", "picture")
+
+
+class ArticleSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Article
+        fields = ("id", "author", "category", "title", "summary", "first_paragraph", "body")

@@ -5,6 +5,8 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.test import APITestCase
 
+from api.models import Article, Author
+
 
 class SignUpLoginTestCase(APITestCase):
     def setUp(self):
@@ -232,3 +234,203 @@ class AuthorAdminTestCase(APITestCase):
         response = self.client.delete(reverse("admin-authors-id", args=[author_id]))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
+
+class ArticleAdminTestCase(APITestCase):
+    def setUp(self):
+        self.credentials = {
+            "username": "admin",
+            "password": "adminpasswd"
+        }
+        self.author = Author.objects.create(name="Some Author", picture="http://authorpic.com")
+        response = self.client.post(reverse("sign-up"), self.credentials)
+        response = self.client.post(reverse("login"), self.credentials)
+        self.auth_token = response.data["token"]
+
+    def test_create_new_article(self):
+        """When we use correct information an article is successfully created.
+        """
+        data = {
+            "author": self.author.id,
+            "category": "Article category",
+            "title": "Article title",
+            "summary": "Article summary",
+            "first_paragraph": "Article first paragraph",
+            "body": "Article body"
+        }
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.auth_token)
+        response = self.client.post(reverse("admin-articles"), data)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_create_new_article_with_invalid_author_id(self):
+        """We are not able to create an article with an invalid author id.
+        """
+        data = {
+            "author": "b6d1a41a-invalid-author-id-f888a2dcf",
+            "category": "Article category",
+            "title": "Article title",
+            "summary": "Article summary",
+            "first_paragraph": "Article first paragraph",
+            "body": "Article body"
+        }
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.auth_token)
+        response = self.client.post(reverse("admin-articles"), data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_create_new_article_with_invalid_credentials(self):
+        """With invalid credentials we are not able to create new articles.
+        """
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + "invalid-token")
+        response = self.client.post(reverse("admin-articles"), {})
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_get_articles_list(self):
+        """With the right credentials, we are able to get a list of articles.
+        """
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.auth_token)
+
+        response = self.client.get(reverse("admin-articles"))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 0)
+
+        author = Author.objects.create(name="Some Author", picture="http://authorpic.com")
+        for i in range(3):
+            Article.objects.create(
+                author=author,
+                category=f"some category 00{i}",
+                title="some title 00{i}",
+            )
+
+        response = self.client.get(reverse("admin-articles"))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 3)
+
+    def test_get_article_by_id(self):
+        """We are able to get a specific article with its id.
+        """
+        author = Author.objects.create(name="Some Author", picture="http://authorpic.com")
+        article = Article.objects.create(
+            author=author,
+            category=f"some category",
+            title="some title",
+        )
+
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.auth_token)
+        response = self.client.get(reverse("admin-articles-id", args=[article.id]))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["id"], str(article.id))
+
+    def test_get_article_by_id_with_invalid_credentials(self):
+        """We are not able to get a specific article with invalid credentials.
+        """
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + "invalid-token")
+        response = self.client.get(reverse("admin-articles-id", args=["we-wont-get-here"]))
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_get_article_by_id_with_invalid_id(self):
+        """We are not able to get a specific article with invalid credentials.
+        """
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.auth_token)
+        response = self.client.get(reverse("admin-articles-id", args=["invalid-id"]))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_update_article_info(self):
+        """With the right credentials and id we are able to update an article info.
+        """
+        author = Author.objects.create(name="Some Author", picture="http://authorpic.com")
+        article = Article.objects.create(
+            author=author,
+            category=f"some category",
+            title="some title",
+            summary="summary",
+            first_paragraph="first paragraph",
+            body="body"
+        )
+
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.auth_token)
+        data = {
+            "author": str(author.id),
+            "category": article.category + " (updated)",
+            "title": article.title + " (updated)",
+            "summary": article.summary,
+            "first_paragraph": article.first_paragraph,
+            "body": article.body,
+        }
+        response = self.client.put(reverse("admin-articles-id", args=[article.id]), data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["category"], data["category"])
+        self.assertEqual(response.data["summary"], data["summary"])
+
+    def test_update_article_info_with_invalid_author_id(self):
+        """With the right credentials and id we are able to update an article info.
+        """
+        author = Author.objects.create(name="Some Author", picture="http://authorpic.com")
+        article = Article.objects.create(
+            author=author,
+            category="some category",
+            title="some title",
+            summary="summary",
+            first_paragraph="first paragraph",
+            body="body"
+        )
+
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.auth_token)
+        data = {
+            "author": "some-invalid-id",
+            "category": article.category + " (updated)",
+            "title": article.title + " (updated)",
+            "summary": article.summary,
+            "first_paragraph": article.first_paragraph,
+            "body": article.body,
+        }
+        response = self.client.put(reverse("admin-articles-id", args=[article.id]), data)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_update_article_info_with_new_author_id(self):
+        """We are able to move an article from a author to other.
+        """
+        author1 = Author.objects.create(name="Author 01", picture="http://author1pic.com")
+        author2 = Author.objects.create(name="Author 02", picture="http://author2pic.com")
+
+        article = Article.objects.create(
+            author=author1,
+            category="some category",
+            title="some title",
+            summary="summary",
+            first_paragraph="first paragraph",
+            body="body"
+        )
+
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.auth_token)
+        data = {
+            "author": str(author2.id),
+            "category": article.category,
+            "title": article.title,
+            "summary": article.summary,
+            "first_paragraph": article.first_paragraph,
+            "body": article.body,
+        }
+        response = self.client.put(reverse("admin-articles-id", args=[article.id]), data)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        article = Article.objects.get(id=article.id)
+        self.assertEqual(article.author.id, author2.id)
+
+    def test_delete_article(self):
+        """With the right credentials and id we are able to update an article info.
+        """
+        author = Author.objects.create(name="Some Author", picture="http://authorpic.com")
+        article = Article.objects.create(
+            author=author,
+            category="some category",
+            title="some title",
+            summary="summary",
+            first_paragraph="first paragraph",
+            body="body"
+        )
+
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.auth_token)
+        response = self.client.delete(reverse("admin-articles-id", args=[article.id]))
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+
+        response = self.client.get(reverse("admin-articles-id", args=[article.id]))
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

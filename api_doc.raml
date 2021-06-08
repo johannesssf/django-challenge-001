@@ -10,9 +10,9 @@ traits:
     usage: Apply this to any method that needs to be secured
     description: Some requests require authentication.
     headers:
-      token:
+      Authorization:
         description: Access Token
-        example: ca7eab006374b95c515cb16f9c7fb5004d8467b2
+        example: Token ca7eab006374b95c515cb16f9c7fb5004d8467b2
         required: true
 
 types:
@@ -205,20 +205,20 @@ types:
               message: Authentication credentials were not provided.
 
 /api/admin/articles:
-  securedBy: JWT
+  is: [secured]
   post:
     description: Create a new article.
     body:
       type: object
       properties:
-        author_id:
+        author:
         category:
         title:
         summary:
         first_paragraph:
         body:
       example:
-        author_id: 2d460e48-a4fa-370b-a2d0-79f2f601988c
+        author: 2d460e48-a4fa-370b-a2d0-79f2f601988c
         category: science fiction
         title: "2001: A Space Odyssey"
         summary: "2001: A Space Odyssey is..."
@@ -230,7 +230,7 @@ types:
         body:
           type: object
           example:
-            author_id: 2d460e48-a4fa-370b-a2d0-79f2f601988c
+            author: 2d460e48-a4fa-370b-a2d0-79f2f601988c
             category: science fiction
             title: "2001: A Space Odyssey"
             summary: "2001: A Space Odyssey is..."
@@ -241,7 +241,7 @@ types:
         body:
           type: Message
           example:
-            message: The informed author id could be found
+            message: Invalid pk fc55f5cd-f239-4e4e-885d-7a02654d51a9 - object does not exist.
       401:
         body:
           type: Message
@@ -256,14 +256,16 @@ types:
           type: array
           example:
             - # item 1
-              author_id: 2d460e48-a4fa-370b-a2d0-79f2f601988c
+              id: abc60e48-a4fa-370b-a2d0-79f2f601988c
+              author: 2d460e48-a4fa-370b-a2d0-79f2f601988c
               category: science fiction
               title: "2001: A Space Odyssey"
               summary: "2001: A Space Odyssey is..."
               first_paragraph: In the prehistoric African veldt, a tribe of hominids is driven away from...
               body: Millions of years later, Dr. Heywood Floyd...
             - # item 2
-              author_id: 12345e48-a4fa-370b-a2d0-79f2f601988c
+              id: def60e48-a4fa-370b-a2d0-79f2f601988c
+              author: 12345e48-a4fa-370b-a2d0-79f2f601988c
               category: drama
               title: "Pride and Prejudice"
               summary: Pride and Prejudice is an 1813 romantic novel of manners written by Jane Austen...
@@ -276,7 +278,7 @@ types:
             message: Authentication credentials were not provided.
 
   /{article_id}:
-    securedBy: JWT
+    is: [secured]
     uriParameters:
       article_id: string
     get:
@@ -308,7 +310,7 @@ types:
       body:
         type: object
         properties:
-          author_id?:
+          author?:
           category?:
           title?:
           summary?:
@@ -323,12 +325,19 @@ types:
           body:
             type: object
             example:
-              author_id: 2d460e48-a4fa-370b-a2d0-79f2f601988c
+              id: 2d460e48-a4fa-370b-a2d0-79f2f6aaaaa
+              author: 2d460e48-a4fa-370b-a2d0-79f2f601988c
               category: science fiction
               title: "2001: A Space Odyssey Updated"
               summary: "2001: A Space Odyssey is... more info"
               first_paragraph: In the prehistoric African veldt, a tribe of hominids is driven away from...
               body: Millions of years later, Dr. Heywood Floyd...
+        400:
+          description: Some parameter is not ok.
+          body:
+            type: Message
+            example:
+              message: invalid-id is not a valid UUID.
         404:
           description: Article id not found.
           body:
@@ -343,7 +352,7 @@ types:
     delete:
       description: Delete the article information with the respective id.
       responses:
-        200:
+        204:
           description: Article successfully deleted.
         404:
           description: Article id not found.

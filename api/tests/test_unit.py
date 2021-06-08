@@ -1,8 +1,4 @@
-import inspect
-from django import test
 from django.test import TestCase
-from django.test.testcases import SerializeMixin
-from rest_framework import serializers
 
 from api.models import Article, Author
 from api.serialyzes import ArticleSerializer, AuthorSerializer

@@ -1,4 +1,3 @@
-from api.models import Author
 from django.contrib.auth.models import User
 from rest_framework import serializers
 

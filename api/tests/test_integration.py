@@ -1,5 +1,4 @@
 from django.contrib.auth.models import User
-from django.http import response
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -10,8 +9,8 @@ from api.models import Article, Author
 
 class SignUpLoginTestCase(APITestCase):
     def setUp(self):
-        self.username="admin"
-        self.password="asdf!@#$"
+        self.username = "admin"
+        self.password = "asdf!@#$"
         user = User.objects.create(username=self.username)
         user.set_password(self.password)
         user.save()
@@ -75,7 +74,6 @@ class AuthorAdminTestCase(APITestCase):
         response = self.client.post(reverse("sign-up"), self.credentials)
         response = self.client.post(reverse("login"), self.credentials)
         self.auth_token = response.data["token"]
-
 
     def test_new_author_create(self):
         """When you have a valid and logged user you're able to create authors.
@@ -310,7 +308,7 @@ class ArticleAdminTestCase(APITestCase):
         author = Author.objects.create(name="Some Author", picture="http://authorpic.com")
         article = Article.objects.create(
             author=author,
-            category=f"some category",
+            category="some category",
             title="some title",
         )
 
@@ -339,7 +337,7 @@ class ArticleAdminTestCase(APITestCase):
         author = Author.objects.create(name="Some Author", picture="http://authorpic.com")
         article = Article.objects.create(
             author=author,
-            category=f"some category",
+            category="some category",
             title="some title",
             summary="summary",
             first_paragraph="first paragraph",

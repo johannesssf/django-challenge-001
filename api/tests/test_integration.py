@@ -432,3 +432,37 @@ class ArticleAdminTestCase(APITestCase):
 
         response = self.client.get(reverse("admin-articles-id", args=[article.id]))
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class ArticleListTestCase(APITestCase):
+    def setUp(self):
+        author = Author.objects.create(name="Some Author", picture="http://authorpic.com")
+        Article.objects.create(
+            author=author,
+            category="some category",
+            title="some title 001",
+            summary="summary 001",
+            first_paragraph="first paragraph 001",
+            body="body 001"
+        )
+        Article.objects.create(
+            author=author,
+            category="some category",
+            title="some title 002",
+            summary="summary 002",
+            first_paragraph="first paragraph 002",
+            body="body 002"
+        )
+        Article.objects.create(
+            author=author,
+            category="other category",
+            title="some title 003",
+            summary="summary 003",
+            first_paragraph="first paragraph 003",
+            body="body 003"
+        )
+
+    def test_list_article_search_all(self):
+        response = self.client.get(reverse("articles-search"))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 3)

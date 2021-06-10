@@ -6,6 +6,7 @@ from .views import (
     AuthorListCreateView,
     AuthorRetrieveUpdateDestroyView,
     ArticleListCreateView,
+    ArticleListSearchView,
     ArticleRetrieveUpdateDestroyView,
 )
 
@@ -25,4 +26,5 @@ urlpatterns = [
         ArticleRetrieveUpdateDestroyView.as_view(),
         name='admin-articles-id'
     ),
+    path('articles/', ArticleListSearchView.as_view(), name='articles-search')
 ]

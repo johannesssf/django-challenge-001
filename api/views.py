@@ -1,10 +1,20 @@
 from django.contrib.auth.models import User
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.generics import CreateAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import (
+    CreateAPIView,
+    ListAPIView,
+    ListCreateAPIView,
+    RetrieveUpdateDestroyAPIView,
+)
 
 from .models import Author, Article
-from .serialyzes import UserSerialyzer, AuthorSerializer, ArticleSerializer
+from .serialyzes import (
+    UserSerialyzer,
+    AuthorSerializer,
+    ArticleSerializer,
+    ArticleListSearchSerializer,
+)
 
 
 class UserSignUpView(CreateAPIView):
@@ -41,3 +51,8 @@ class ArticleRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
     lookup_field = "id"
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
+
+
+class ArticleListSearchView(ListAPIView):
+    queryset = Article.objects.all()
+    serializer_class = ArticleListSearchSerializer

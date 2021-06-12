@@ -371,9 +371,61 @@ types:
     description: Get a list of articles.
     queryParameters:
       category?:
-        description: Category slug
+        description: Filter by category
         type: string
-        example: science-fiction
+        example: some category
+    responses:
+      200:
+        body:
+          type: array
+          examples:
+            not_filtered:
+              - # item1
+                id: 4568d7b9-84c9-4dd1-88f0-ea9ed4b880f8
+                author:
+                  id: 325f89ea-c4c6-4ab6-9fdf-bf89662b9848
+                  name: Some Author
+                  picture: http://authorpic.com
+                category: some category
+                title: some title 001
+                summary: summary 001
+              - # item2
+                id: 80e7f57c-9a93-40fc-81b1-90232c42144e
+                author:
+                  id: 325f89ea-c4c6-4ab6-9fdf-bf89662b9848
+                  name: Some Author
+                  picture: http://authorpic.com
+                category: some category
+                title: some title 002
+                summary: summary 002
+              - # item3
+                id: 80e1237c-9a93-40fc-81b1-90232c42144e
+                author:
+                  id: 325f89ea-c4c6-4ab6-9fdf-bf89662b9848
+                  name: Some Author
+                  picture: http://authorpic.com
+                category: other category
+                title: some title 003
+                summary: summary 003
+            filtered:
+            - # item1
+              id: 4568d7b9-84c9-4dd1-88f0-ea9ed4b880f8
+              author:
+                id: 325f89ea-c4c6-4ab6-9fdf-bf89662b9848
+                name: Some Author
+                picture: http://authorpic.com
+              category: some category
+              title: some title 001
+              summary: summary 001
+            - # item2
+              id: 80e7f57c-9a93-40fc-81b1-90232c42144e
+              author:
+                id: 325f89ea-c4c6-4ab6-9fdf-bf89662b9848
+                name: Some Author
+                picture: http://authorpic.com
+              category: some category
+              title: some title 002
+              summary: summary 003
 
   /{article_id}:
     description: Detailed information of an article.

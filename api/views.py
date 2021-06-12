@@ -1,10 +1,12 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AnonymousUser
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import (
     CreateAPIView,
     ListAPIView,
     ListCreateAPIView,
+    RetrieveAPIView,
     RetrieveUpdateDestroyAPIView,
 )
 
@@ -14,6 +16,8 @@ from .serialyzes import (
     AuthorSerializer,
     ArticleSerializer,
     ArticleListSearchSerializer,
+    ArticleListLoggedUserSerializer,
+    ArticleListAnonymousUserSerializer,
 )
 
 
@@ -56,3 +60,15 @@ class ArticleRetrieveUpdateDestroyView(RetrieveUpdateDestroyAPIView):
 class ArticleListSearchView(ListAPIView):
     queryset = Article.objects.all()
     serializer_class = ArticleListSearchSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['category']
+
+
+class ArticleListView(RetrieveAPIView):
+    queryset = Article.objects.all()
+    lookup_field = "id"
+
+    def get_serializer_class(self):
+        if isinstance(self.request.user, AnonymousUser):
+            return ArticleListAnonymousUserSerializer
+        return ArticleListLoggedUserSerializer

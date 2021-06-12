@@ -461,8 +461,49 @@ class ArticleListTestCase(APITestCase):
             first_paragraph="first paragraph 003",
             body="body 003"
         )
+        self.credentials = {
+            "username": "admin",
+            "password": "adminpasswd"
+        }
+        self.author = Author.objects.create(name="Some Author", picture="http://authorpic.com")
+        response = self.client.post(reverse("sign-up"), self.credentials)
+        response = self.client.post(reverse("login"), self.credentials)
+        self.auth_token = response.data["token"]
 
     def test_list_article_search_all(self):
+        """Without filter all articles are returned.
+        """
         response = self.client.get(reverse("articles-search"))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 3)
+
+    def test_list_article_filter_category(self):
+        """The article's category can be used as a filter.
+        """
+        response = self.client.get(reverse("articles-search") + "?category=other category")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+
+    def test_list_article_filter_category2(self):
+        """The article's category can be used as a filter.
+        """
+        response = self.client.get(reverse("articles-search") + "?category=some category")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+
+    def test_article_detail_with_anonymous_user(self):
+        """Anonymous users are allowed but they will get less information.
+        """
+        article = Article.objects.first()
+        response = self.client.get(reverse("articles-detail", args=[str(article.id)]))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertNotIn("body", response.data)
+
+    def test_article_detail_with_logged_user(self):
+        """Logged users will get full information.
+        """
+        article = Article.objects.first()
+        self.client.credentials(HTTP_AUTHORIZATION="Token " + self.auth_token)
+        response = self.client.get(reverse("articles-detail", args=[str(article.id)]))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("body", response.data)

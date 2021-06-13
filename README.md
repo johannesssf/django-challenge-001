@@ -77,3 +77,37 @@
       "body": "<div><p>Second paragraph</p><p>Third paragraph</p></div>"
     }
     ```
+
+## API documentation
+
+Check the API documentation here.
+
+## How to run for development
+
+### Dependencies
+
+* Docker
+* Python 3.5+
+
+Follow the steps below to start developing.
+
+1. Clone the repository and _cd_ to directory
+```
+git clone https://github.com/johannesssf/django-challenge-001.git
+cd django-challenge-001
+```
+2. Start the postgres container
+```
+docker-compose -f docker-compose-dev.yml up
+```
+3. Migrate the app models and start the Django server to check the API working
+```
+python manager.py migrate
+python manager.py runserver
+```
+4. Now open your favorite REST app and start to send request to:
+```
+http://localhost:8000/api/
+```
+
+## How to run for production

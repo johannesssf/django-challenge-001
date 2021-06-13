@@ -80,7 +80,7 @@
 
 ## API documentation
 
-Check the API documentation here.
+Check the API documentation [here](https://johannesssf.github.io/django-challenge-001/api_doc.html).
 
 ## How to run for development
 
@@ -100,12 +100,19 @@ cd django-challenge-001
 ```
 docker-compose -f docker-compose-dev.yml up
 ```
-3. Migrate the app models and start the Django server to check the API working
+3. Create a file named ".env" and set the following variables:
+```
+DEBUG=on
+DJANGO_APP_KEY='django-secret-key-xn!=1%#$21&6@vk8=p6uui&5f*s*6!0^'
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=challenge
+```
+4. Migrate the app models and start the Django server to check the API working
 ```
 python manager.py migrate
 python manager.py runserver
 ```
-4. Now open your favorite REST app and start to send request to:
+5. Now open your favorite REST app and start to send request to:
 ```
 http://localhost:8000/api/
 ```

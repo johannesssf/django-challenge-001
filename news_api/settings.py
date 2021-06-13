@@ -33,7 +33,7 @@ SECRET_KEY = env('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -92,7 +92,7 @@ DATABASES = {
         'NAME': "challenge",
         'PASSWORD': env('POSTGRES_PASSWORD'),
         'POSTGRES_DB': "challenge",
-        'HOST': '127.0.0.1',
+        'HOST': env('POSTGRES_URL'),
         'PORT': '5432',
     }
 }

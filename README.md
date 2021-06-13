@@ -107,12 +107,17 @@ pip install -r requirements.txt
 ```
 docker-compose -f docker-compose-dev.yml up -d
 ```
-1. Create a file named ".env" and set the following variables:
+1. Create a file named ".env" into news_api directory and set the following variables:
 ```
 DEBUG=on
-SECRET_KEY='-spx)yp3tr$pcx$=^8xn!=1%#$21&6@vk8=p6uui&5f*s*6!0^'
+DJANGO_SECRET_KEY='your-secret-key-here-=1%#$21&6@vk8=p6uui&5f*s*6!0^'
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=challenge
+POSTGRES_URL=localhost
+```
+1. Use this commando to run the tests:
+```
+python manage.py test
 ```
 1. Migrate the app models and start the Django server to check the API working
 ```
@@ -125,3 +130,20 @@ http://localhost:8000/api/
 ```
 
 ## How to run for production
+
+Follow the steps below to run a production environment.
+
+1. Build and up the environment containers:
+
+```
+docker-compose -f docker-compose-prod.yml
+```
+
+2. Migrate the app models:
+```
+docker container exec django-challenge-001_web_1 python /app/manage.py migrate
+```
+3. Now open your favorite REST app and start to send request to:
+```
+http://<server ip address>:8008/api/
+```

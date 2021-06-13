@@ -86,33 +86,40 @@ Check the API documentation [here](https://johannesssf.github.io/django-challeng
 
 ### Dependencies
 
-* Docker
-* Python 3.5+
+* docker
+* docker-compose
+* python 3.5+
 
 Follow the steps below to start developing.
 
-1. Clone the repository and _cd_ to directory
+1. Clone the repository and _cd_ to it
 ```
 git clone https://github.com/johannesssf/django-challenge-001.git
 cd django-challenge-001
 ```
-2. Start the postgres container
+
+1. Run the command to install projetc dependencies
 ```
-docker-compose -f docker-compose-dev.yml up
+pip install -r requirements.txt
 ```
-3. Create a file named ".env" and set the following variables:
+
+1. Start the postgres container
+```
+docker-compose -f docker-compose-dev.yml up -d
+```
+1. Create a file named ".env" and set the following variables:
 ```
 DEBUG=on
-DJANGO_APP_KEY='django-secret-key-xn!=1%#$21&6@vk8=p6uui&5f*s*6!0^'
+SECRET_KEY='-spx)yp3tr$pcx$=^8xn!=1%#$21&6@vk8=p6uui&5f*s*6!0^'
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=challenge
 ```
-4. Migrate the app models and start the Django server to check the API working
+1. Migrate the app models and start the Django server to check the API working
 ```
-python manager.py migrate
-python manager.py runserver
+python manage.py migrate
+python manage.py runserver
 ```
-5. Now open your favorite REST app and start to send request to:
+1. Now open your favorite REST app and start to send request to:
 ```
 http://localhost:8000/api/
 ```

@@ -98,16 +98,16 @@ git clone https://github.com/johannesssf/django-challenge-001.git
 cd django-challenge-001
 ```
 
-1. Run the command to install projetc dependencies
+2. Run the command to install projetc dependencies
 ```
 pip install -r requirements.txt
 ```
 
-1. Start the postgres container
+3. Start the postgres container
 ```
 docker-compose -f docker-compose-dev.yml up -d
 ```
-1. Create a file named ".env" into news_api directory and set the following variables:
+4. Create a file named ".env" into news_api directory and set the following variables:
 ```
 DEBUG=on
 DJANGO_SECRET_KEY='your-secret-key-here-=1%#$21&6@vk8=p6uui&5f*s*6!0^'
@@ -115,16 +115,16 @@ POSTGRES_USER=postgres
 POSTGRES_PASSWORD=challenge
 POSTGRES_URL=localhost
 ```
-1. Use this commando to run the tests:
+5. Use this commando to run the tests:
 ```
 python manage.py test
 ```
-1. Migrate the app models and start the Django server to check the API working
+6. Migrate the app models and start the Django server to check the API working
 ```
 python manage.py migrate
 python manage.py runserver
 ```
-1. Now open your favorite REST app and start to send request to:
+7. Now open your favorite REST app and start to send request to:
 ```
 http://localhost:8000/api/
 ```
@@ -136,7 +136,7 @@ Follow the steps below to run a production environment.
 1. Build and up the environment containers:
 
 ```
-docker-compose -f docker-compose-prod.yml
+docker-compose -f docker-compose-prod.yml up
 ```
 
 2. Migrate the app models:
